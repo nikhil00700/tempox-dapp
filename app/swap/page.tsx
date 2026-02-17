@@ -18,7 +18,7 @@ export default function Swap() {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [tempBalance, setTempBalance] = useState("0");
   const [alphaBalance, setAlphaBalance] = useState("0");
-  const [approved, setApproved] = useState(false);
+  const [allowance, setAllowance] = useState<bigint>(0n);
 
   const calculateReceiveAmount = () => {
     if (!amount) return "0.0";
@@ -27,41 +27,72 @@ export default function Swap() {
     return afterFee.toFixed(4);
   };
 
-  const getSigner = async () => {
+  const getProvider = async () => {
     if (!window.ethereum) throw new Error("MetaMask not found");
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    return await provider.getSigner();
+    return new ethers.BrowserProvider(window.ethereum);
+  };
+
+  const getSigner = async () => {
+    const provider = await getProvider();
+    return provider.getSigner();
   };
 
   const connectWallet = async () => {
-    if (!window.ethereum) {
-      alert("MetaMask not installed");
-      return;
-    }
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      const provider = await getProvider();
       const accounts = await provider.send("eth_requestAccounts", []);
       setWalletAddress(accounts[0]);
       await refreshBalances(accounts[0], provider);
+      await checkAllowance(accounts[0], provider);
     } catch (err) {
       console.error(err);
     }
   };
 
-  const refreshBalances = async (address?: string, provider?: ethers.BrowserProvider) => {
-    if (!window.ethereum && !provider) return;
-    const signer = provider || (await getSigner());
+  const refreshBalances = async (
+    address?: string,
+    provider?: ethers.BrowserProvider
+  ) => {
+    const prov = provider || (await getProvider());
     const userAddress = address || walletAddress;
     if (!userAddress) return;
 
-    const tempContract = new ethers.Contract(TEMP_ADDRESS, ERC20_ABI, signer);
-    const alphaContract = new ethers.Contract(ALPHA_ADDRESS, ERC20_ABI, signer);
+    const tempContract = new ethers.Contract(
+      TEMP_ADDRESS,
+      ERC20_ABI,
+      prov
+    );
+    const alphaContract = new ethers.Contract(
+      ALPHA_ADDRESS,
+      ERC20_ABI,
+      prov
+    );
 
     const tempBal = await tempContract.balanceOf(userAddress);
     const alphaBal = await alphaContract.balanceOf(userAddress);
 
     setTempBalance(ethers.formatUnits(tempBal, 18));
     setAlphaBalance(ethers.formatUnits(alphaBal, 18));
+  };
+
+  const checkAllowance = async (
+    address?: string,
+    provider?: ethers.BrowserProvider
+  ) => {
+    if (!amount) {
+      setAllowance(0n);
+      return;
+    }
+
+    const prov = provider || (await getProvider());
+    const userAddress = address || walletAddress;
+    if (!userAddress) return;
+
+    const tokenAddress = isReversed ? ALPHA_ADDRESS : TEMP_ADDRESS;
+    const token = new ethers.Contract(tokenAddress, ERC20_ABI, prov);
+
+    const allowed = await token.allowance(userAddress, SWAP_ADDRESS);
+    setAllowance(allowed);
   };
 
   const approveToken = async () => {
@@ -78,8 +109,7 @@ export default function Swap() {
       await tx.wait();
 
       alert("✅ Approval successful");
-      setApproved(true);
-      if (walletAddress) await refreshBalances();
+      await checkAllowance();
     } catch (err) {
       console.error(err);
       alert("❌ Approval failed");
@@ -103,8 +133,10 @@ export default function Swap() {
 
       await tx.wait();
       alert("✅ Swap successful");
+
       setAmount("");
-      if (walletAddress) await refreshBalances();
+      await refreshBalances();
+      await checkAllowance();
     } catch (err: any) {
       console.error(err);
       alert(err?.reason || "❌ Swap failed");
@@ -113,25 +145,36 @@ export default function Swap() {
     }
   };
 
-  // Decide which button to show
+  useEffect(() => {
+    if (walletAddress) {
+      checkAllowance();
+    }
+  }, [amount, isReversed]);
+
+  const parsedAmount = amount
+    ? ethers.parseUnits(amount || "0", 18)
+    : 0n;
+
+  const needsApproval = allowance < parsedAmount;
+
   const renderActionButton = () => {
     if (!walletAddress) {
       return (
         <button
           onClick={connectWallet}
-          className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 transition text-white font-semibold shadow-md hover:shadow-purple-400/70"
+          className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 transition text-white font-semibold"
         >
           Connect Wallet
         </button>
       );
     }
 
-    if (!approved) {
+    if (needsApproval) {
       return (
         <button
           onClick={approveToken}
           disabled={loading || !amount}
-          className="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 disabled:opacity-50 transition text-white font-semibold shadow-md hover:shadow-purple-500/50"
+          className="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-white font-semibold"
         >
           {loading ? "Processing..." : "Approve"}
         </button>
@@ -142,7 +185,7 @@ export default function Swap() {
       <button
         onClick={swapTokens}
         disabled={loading || !amount}
-        className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-purple-600 hover:to-pink-500 disabled:opacity-50 transition text-white font-semibold shadow-md hover:shadow-pink-500/50"
+        className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 disabled:opacity-50 text-white font-semibold"
       >
         {loading ? "Processing..." : "Swap"}
       </button>
@@ -152,21 +195,14 @@ export default function Swap() {
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
       <Sidebar />
-
       <main className="flex-1 flex flex-col items-center justify-center p-6 space-y-6">
-
-        {/* Swap Box */}
-        <div className="relative w-full max-w-md rounded-3xl p-[2px] 
-                        bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500
-                        shadow-2xl transition-all duration-300 hover:shadow-[0_0_25px_rgba(128,0,255,0.9)] hover:scale-105">
+      <div className="group relative w-full max-w-md rounded-3xl p-[2px] bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-all duration-300 hover:shadow-[0_0_40px_rgba(168,85,247,0.8)]">
           <div className="bg-slate-900/90 backdrop-blur-xl p-6 rounded-3xl space-y-6">
-
-            <h2 className="text-2xl font-bold text-center text-purple-400 drop-shadow-lg">
+            <h2 className="text-2xl font-bold text-center text-purple-400">
               Token Swap
             </h2>
 
-            {/* From Box */}
-            <div className="bg-slate-800 p-4 rounded-xl border border-purple-600 hover:border-pink-500 transition relative">
+            <div className="bg-slate-800 p-4 rounded-xl relative">
               <p className="text-sm text-gray-400 mb-1">
                 From ({isReversed ? "ALPHA" : "TEMP"})
               </p>
@@ -175,41 +211,35 @@ export default function Swap() {
                 placeholder="0.0"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full bg-transparent text-2xl text-white placeholder-gray-500 outline-none"
+                className="w-full bg-transparent text-2xl outline-none"
               />
-              {/* Balance on right side */}
               <span className="absolute top-4 right-4 text-sm text-purple-400">
                 {isReversed ? alphaBalance : tempBalance}
               </span>
             </div>
 
-            {/* Reverse Button */}
-            <div className="flex justify-center -mt-2">
+            <div className="flex justify-center">
               <button
                 onClick={() => setIsReversed(!isReversed)}
-                className="bg-slate-700 hover:bg-slate-600 rounded-full p-2 text-purple-400 hover:text-pink-400 transition shadow-md hover:shadow-pink-500/50"
+                className="bg-slate-700 rounded-full p-2"
               >
                 ⇅
               </button>
             </div>
 
-            {/* To Box */}
-            <div className="bg-slate-800 p-4 rounded-xl border border-purple-600 hover:border-pink-500 transition relative">
+            <div className="bg-slate-800 p-4 rounded-xl relative">
               <p className="text-sm text-gray-400">
                 To ({isReversed ? "TEMP" : "ALPHA"})
               </p>
-              <p className="text-2xl mt-2 text-purple-400 font-semibold drop-shadow-md">
+              <p className="text-2xl mt-2 text-purple-400 font-semibold">
                 {calculateReceiveAmount()}
               </p>
-              {/* Balance on right side */}
               <span className="absolute top-4 right-4 text-sm text-purple-400">
                 {isReversed ? tempBalance : alphaBalance}
               </span>
             </div>
 
-            {/* Single Dynamic Action Button */}
             <div className="mt-4">{renderActionButton()}</div>
-
           </div>
         </div>
       </main>
