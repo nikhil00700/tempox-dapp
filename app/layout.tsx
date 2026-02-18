@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({ subsets: ["latin"] });
-const geistMono = Geist_Mono({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: "Temp Testnet Hub",
-  description: "DeFi Dashboard",
+  title: "Tempo Testnet Hub",
+  description: "Tempo Infrastructure Dashboard",
 };
 
 export default function RootLayout({
@@ -17,7 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={'${geistSans.className} ${geistMono.className}'}>
+      <body className={`${inter.className} bg-[#0B1220] text-[#E5E7EB] antialiased`}>
         {children}
       </body>
     </html>

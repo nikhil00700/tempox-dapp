@@ -57,16 +57,8 @@ export default function Swap() {
     const userAddress = address || walletAddress;
     if (!userAddress) return;
 
-    const tempContract = new ethers.Contract(
-      TEMP_ADDRESS,
-      ERC20_ABI,
-      prov
-    );
-    const alphaContract = new ethers.Contract(
-      ALPHA_ADDRESS,
-      ERC20_ABI,
-      prov
-    );
+    const tempContract = new ethers.Contract(TEMP_ADDRESS, ERC20_ABI, prov);
+    const alphaContract = new ethers.Contract(ALPHA_ADDRESS, ERC20_ABI, prov);
 
     const tempBal = await tempContract.balanceOf(userAddress);
     const alphaBal = await alphaContract.balanceOf(userAddress);
@@ -162,7 +154,7 @@ export default function Swap() {
       return (
         <button
           onClick={connectWallet}
-          className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 transition text-white font-semibold"
+          className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition font-semibold hover:shadow-[0_0_20px_rgba(99,102,241,0.4)]"
         >
           Connect Wallet
         </button>
@@ -174,7 +166,7 @@ export default function Swap() {
         <button
           onClick={approveToken}
           disabled={loading || !amount}
-          className="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-white font-semibold"
+          className="w-full py-3 rounded-xl bg-[#1F2937] hover:bg-[#374151] disabled:opacity-50 font-semibold"
         >
           {loading ? "Processing..." : "Approve"}
         </button>
@@ -185,7 +177,7 @@ export default function Swap() {
       <button
         onClick={swapTokens}
         disabled={loading || !amount}
-        className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 disabled:opacity-50 text-white font-semibold"
+        className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 disabled:opacity-50 font-semibold hover:shadow-[0_0_25px_rgba(99,102,241,0.4)]"
       >
         {loading ? "Processing..." : "Swap"}
       </button>
@@ -193,16 +185,17 @@ export default function Swap() {
   };
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+    <div className="min-h-screen flex bg-gradient-to-br from-[#0B1220] via-[#0F1B2D] to-[#0A1628] text-[#E5E7EB]">
       <Sidebar />
-      <main className="flex-1 flex flex-col items-center justify-center p-6 space-y-6">
-      <div className="group relative w-full max-w-md rounded-3xl p-[2px] bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-all duration-300 hover:shadow-[0_0_40px_rgba(168,85,247,0.8)]">
-          <div className="bg-slate-900/90 backdrop-blur-xl p-6 rounded-3xl space-y-6">
-            <h2 className="text-2xl font-bold text-center text-purple-400">
+
+      <main className="flex-1 flex flex-col items-center justify-center p-6">
+        <div className="relative w-full max-w-md rounded-3xl p-[2px] bg-gradient-to-r from-indigo-500 via-blue-500 to-indigo-400 hover:shadow-[0_0_40px_rgba(99,102,241,0.45)] transition-all duration-300">
+          <div className="bg-[#0F172A]/95 backdrop-blur-xl p-6 rounded-3xl space-y-6">
+            <h2 className="text-2xl font-bold text-center text-indigo-400">
               Token Swap
             </h2>
 
-            <div className="bg-slate-800 p-4 rounded-xl relative">
+            <div className="bg-[#111827] p-4 rounded-xl relative">
               <p className="text-sm text-gray-400 mb-1">
                 From ({isReversed ? "ALPHA" : "TEMP"})
               </p>
@@ -213,7 +206,7 @@ export default function Swap() {
                 onChange={(e) => setAmount(e.target.value)}
                 className="w-full bg-transparent text-2xl outline-none"
               />
-              <span className="absolute top-4 right-4 text-sm text-purple-400">
+              <span className="absolute top-4 right-4 text-sm text-indigo-400">
                 {isReversed ? alphaBalance : tempBalance}
               </span>
             </div>
@@ -221,25 +214,25 @@ export default function Swap() {
             <div className="flex justify-center">
               <button
                 onClick={() => setIsReversed(!isReversed)}
-                className="bg-slate-700 rounded-full p-2"
+                className="bg-[#1F2937] rounded-full p-2 hover:bg-[#374151] transition"
               >
                 ⇅
               </button>
             </div>
 
-            <div className="bg-slate-800 p-4 rounded-xl relative">
+            <div className="bg-[#111827] p-4 rounded-xl relative">
               <p className="text-sm text-gray-400">
                 To ({isReversed ? "TEMP" : "ALPHA"})
               </p>
-              <p className="text-2xl mt-2 text-purple-400 font-semibold">
+              <p className="text-2xl mt-2 text-indigo-400 font-semibold">
                 {calculateReceiveAmount()}
               </p>
-              <span className="absolute top-4 right-4 text-sm text-purple-400">
+              <span className="absolute top-4 right-4 text-sm text-indigo-400">
                 {isReversed ? tempBalance : alphaBalance}
               </span>
             </div>
 
-            <div className="mt-4">{renderActionButton()}</div>
+            <div>{renderActionButton()}</div>
           </div>
         </div>
       </main>

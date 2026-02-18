@@ -21,7 +21,6 @@ export default function Dashboard() {
     return new ethers.BrowserProvider(window.ethereum);
   };
 
-  // Fetch latest block
   useEffect(() => {
     const fetchBlock = async () => {
       if (!window.ethereum) return;
@@ -35,7 +34,6 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  // Listen for wallet changes
   useEffect(() => {
     if (!window.ethereum) return;
 
@@ -50,6 +48,21 @@ export default function Dashboard() {
       window.ethereum.removeListener("chainChanged", handleChainChanged);
     };
   }, []);
+
+  /* ===========================
+     FAUCET FUNCTION
+  ============================ */
+
+  const openFaucet = () => {
+    window.open(
+      "https://docs.tempo.xyz/quickstart/faucet?tab-1=fund-an-address",
+      "_blank"
+    );
+  };
+
+  /* ===========================
+     ADD TEMPO NETWORK FUNCTION
+  ============================ */
 
   const addTempoNetwork = async () => {
     await window.ethereum.request({
@@ -82,6 +95,10 @@ export default function Dashboard() {
       }
     }
   };
+
+  /* ===========================
+        CONNECT WALLET
+  ============================ */
 
   const connectWallet = async () => {
     if (!window.ethereum) {
@@ -125,33 +142,30 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+    <div className="min-h-screen flex bg-gradient-to-br from-[#0B1220] via-[#0F1B2D] to-[#0A1628] text-[#E6EDF3]">
       <Sidebar />
 
       <main className="flex-1 p-6">
-
-        {/* Header */}
+        {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-purple-400 drop-shadow-lg">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-[#00D4FF] to-[#5B8CFF] bg-clip-text text-transparent">
             Dashboard
           </h1>
 
           {walletAddress ? (
             <div className="flex items-center gap-3">
-
-              {/* Animated Network Badge */}
               <div
                 className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300
                 ${
                   isWrongNetwork
-                    ? "bg-red-600 animate-pulse shadow-[0_0_15px_rgba(255,0,0,0.7)]"
-                    : "bg-green-600 shadow-[0_0_15px_rgba(34,197,94,0.7)]"
+                    ? "bg-rose-500/10 text-rose-400 border border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.25)]"
+                    : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.25)]"
                 }`}
               >
                 {isWrongNetwork ? "Wrong Network" : "Tempo Connected"}
               </div>
 
-              <div className="bg-slate-700 px-4 py-2 rounded-lg text-sm font-semibold">
+              <div className="bg-[#111C2D] border border-[#1F2A3A] px-4 py-2 rounded-lg text-sm font-semibold text-[#E6EDF3]">
                 {walletAddress.slice(0, 6)}...
                 {walletAddress.slice(-4)}
               </div>
@@ -159,48 +173,71 @@ export default function Dashboard() {
           ) : (
             <button
               onClick={connectWallet}
-              className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg font-semibold transition shadow-md hover:shadow-blue-400/50"
+              className="bg-gradient-to-r from-[#00D4FF] to-[#5B8CFF] 
+              hover:opacity-90 px-4 py-2 rounded-lg font-semibold 
+              text-black transition shadow-md 
+              hover:shadow-[0_0_20px_rgba(0,212,255,0.35)]"
             >
               Connect Wallet
             </button>
           )}
         </div>
 
+        {/* SWITCH NETWORK BUTTON */}
         {isWrongNetwork && walletAddress && (
           <div className="mb-6">
             <button
               onClick={switchToTempo}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 rounded-xl font-semibold hover:scale-105 transition shadow-[0_0_20px_rgba(168,85,247,0.7)]"
+              className="bg-gradient-to-r from-[#00D4FF] to-[#5B8CFF] 
+              px-6 py-3 rounded-xl font-semibold text-black
+              hover:opacity-90 transition 
+              shadow-[0_0_20px_rgba(0,212,255,0.35)]"
             >
               Switch to Tempo Testnet
             </button>
           </div>
         )}
 
-        {/* Stats Grid */}
+        {/* STATS GRID */}
         <div className="grid md:grid-cols-3 gap-6">
-          <div className="bg-slate-800/70 p-6 rounded-xl border border-purple-500/30 hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] transition">
-            <h2 className="text-lg font-semibold mb-2">Network</h2>
-            <p className="text-purple-400 font-bold">
-              {network || "Not Connected"}
-            </p>
-          </div>
+          {[
+            { label: "Network", value: network || "Not Connected" },
+            { label: "TEMP Balance", value: tempBalance },
+            { label: "ALPHA Balance", value: alphaBalance },
+            { label: "Latest Block", value: blockNumber ?? "Loading..." },
+          ].map((item, index) => (
+            <div
+              key={index}
+              className="bg-[#111C2D]/80 p-6 rounded-xl border border-[#1F2A3A] 
+              hover:shadow-[0_0_25px_rgba(0,212,255,0.15)] transition"
+            >
+              <h2 className="text-lg font-semibold mb-2 text-gray-400">
+                {item.label}
+              </h2>
+              <p className="text-[#00D4FF] font-bold">
+                {item.value}
+              </p>
+            </div>
+          ))}
 
-          <div className="bg-slate-800/70 p-6 rounded-xl border border-purple-500/30 hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] transition">
-            <h2 className="text-lg font-semibold mb-2">TEMP Balance</h2>
-            <p className="text-purple-400 font-bold">{tempBalance}</p>
-          </div>
-
-          <div className="bg-slate-800/70 p-6 rounded-xl border border-purple-500/30 hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] transition">
-            <h2 className="text-lg font-semibold mb-2">ALPHA Balance</h2>
-            <p className="text-purple-400 font-bold">{alphaBalance}</p>
-          </div>
-
-          <div className="bg-slate-800/70 p-6 rounded-xl border border-purple-500/30 hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] transition">
-            <h2 className="text-lg font-semibold mb-2">Latest Block</h2>
-            <p className="text-purple-400 font-bold">
-              {blockNumber ?? "Loading..."}
-            </p>
+          {/* FAUCET CARD */}
+          <div
+            className="bg-[#111C2D]/80 p-6 rounded-xl border border-[#1F2A3A] 
+            hover:shadow-[0_0_25px_rgba(0,212,255,0.15)] transition"
+          >
+            <h2 className="text-lg font-semibold mb-2 text-gray-400">
+              Testnet Faucet
+            </h2>
+            
+            <button
+              onClick={openFaucet}
+              className="bg-gradient-to-r from-[#00D4FF] to-[#5B8CFF] 
+              px-4 py-2 rounded-lg font-semibold text-black 
+              hover:opacity-90 transition 
+              shadow-[0_0_15px_rgba(0,212,255,0.35)]"
+            >
+              Claim Faucet
+            </button>
           </div>
         </div>
       </main>

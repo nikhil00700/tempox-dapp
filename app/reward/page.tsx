@@ -14,7 +14,6 @@ export default function RewardPage() {
   const rewardAmount = "15 TEMP";
   const cooldownSeconds = 7 * 24 * 60 * 60;
 
-  // Connect Wallet
   async function connectWallet() {
     if (!window.ethereum) {
       alert("Please install MetaMask");
@@ -22,13 +21,12 @@ export default function RewardPage() {
     }
 
     const provider = new ethers.BrowserProvider(window.ethereum);
-    const accounts = await provider.send("eth_requestAccounts", []) as string[];
+    const accounts = (await provider.send("eth_requestAccounts", [])) as string[];
     if (accounts && accounts[0]) {
       setWalletAddress(accounts[0]);
     }
   }
 
-  // Fetch Last Claim Timestamp
   async function fetchLastClaim(address: string) {
     if (!window.ethereum) return;
     const provider = new ethers.BrowserProvider(window.ethereum);
@@ -52,10 +50,9 @@ export default function RewardPage() {
     }
   }
 
-  // Claim Reward
   async function claimReward() {
     if (!window.ethereum || !walletAddress) return;
-    
+
     try {
       setLoading(true);
 
@@ -72,19 +69,17 @@ export default function RewardPage() {
       await tx.wait();
 
       alert("Reward Claimed Successfully ✅");
-      if (walletAddress) {
-        fetchLastClaim(walletAddress);
-      }
+      fetchLastClaim(walletAddress);
     } catch (error: unknown) {
       console.error(error);
-      const errorMessage = error instanceof Error ? error.message : "Claim Failed ❌";
+      const errorMessage =
+        error instanceof Error ? error.message : "Claim Failed ❌";
       alert(errorMessage);
     } finally {
       setLoading(false);
     }
   }
 
-  // Format Countdown
   function formatTime(seconds: number): string {
     const d = Math.floor(seconds / 86400);
     const h = Math.floor((seconds % 86400) / 3600);
@@ -99,23 +94,20 @@ export default function RewardPage() {
   }, [walletAddress]);
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
-
-      {/* Sidebar */}
+    <div className="min-h-screen flex bg-gradient-to-br from-[#0B1220] via-[#0F1B2D] to-[#0A1628] text-[#E5E7EB]">
       <Sidebar />
 
-      {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center">
-        <div className="bg-slate-800/80 backdrop-blur-lg border border-purple-500/30 shadow-[0_0_40px_rgba(168,85,247,0.3)] rounded-2xl p-8 w-[420px] text-center transition-all duration-500">
+      <main className="flex-1 flex items-center justify-center p-6">
+        <div className="bg-[#111827]/80 backdrop-blur-lg border border-indigo-500/20 shadow-[0_0_40px_rgba(99,102,241,0.25)] rounded-2xl p-8 w-[420px] text-center transition-all duration-500 hover:shadow-[0_0_50px_rgba(99,102,241,0.35)]">
 
-          <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold mb-6 text-indigo-400">
             Weekly Reward
           </h2>
 
           {!walletAddress ? (
             <button
               onClick={connectWallet}
-              className="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-xl w-full font-semibold transition-all duration-300 hover:shadow-[0_0_25px_rgba(168,85,247,0.7)]"
+              className="bg-indigo-600 hover:bg-indigo-500 px-6 py-3 rounded-xl w-full font-semibold transition-all duration-300 hover:shadow-[0_0_25px_rgba(99,102,241,0.4)]"
             >
               Connect Wallet
             </button>
@@ -125,17 +117,17 @@ export default function RewardPage() {
                 {walletAddress}
               </p>
 
-              <div className="bg-slate-900/70 rounded-xl p-4 mb-6 border border-purple-500/20">
+              <div className="bg-[#0F172A] rounded-xl p-4 mb-6 border border-indigo-500/10">
                 <p className="text-lg font-semibold mb-2">
                   Reward: {rewardAmount}
                 </p>
 
                 {cooldownLeft > 0 ? (
-                  <p className="text-red-400 text-sm">
+                  <p className="text-rose-400 text-sm">
                     Next claim in: {formatTime(cooldownLeft)}
                   </p>
                 ) : (
-                  <p className="text-green-400 text-sm">
+                  <p className="text-emerald-400 text-sm">
                     You can claim now!
                   </p>
                 )}
@@ -147,7 +139,7 @@ export default function RewardPage() {
                 className={`w-full px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
                   cooldownLeft > 0
                     ? "bg-gray-600 cursor-not-allowed"
-                    : "bg-green-600 hover:bg-green-700 hover:shadow-[0_0_25px_rgba(34,197,94,0.7)]"
+                    : "bg-emerald-500 hover:bg-emerald-400 hover:shadow-[0_0_25px_rgba(16,185,129,0.4)]"
                 }`}
               >
                 {loading ? "Claiming..." : "Claim Reward"}
