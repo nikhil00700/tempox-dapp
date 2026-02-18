@@ -94,58 +94,62 @@ export default function RewardPage() {
   }, [walletAddress]);
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-[#0B1220] via-[#0F1B2D] to-[#0A1628] text-[#E5E7EB]">
+    <div className="min-h-screen flex bg-gradient-to-br from-[#0A1628] via-[#0F1B2D] to-[#0B1220] text-[#E5E7EB]">
       <Sidebar />
 
       <main className="flex-1 flex items-center justify-center p-6">
-        <div className="bg-[#111827]/80 backdrop-blur-lg border border-indigo-500/20 shadow-[0_0_40px_rgba(99,102,241,0.25)] rounded-2xl p-8 w-[420px] text-center transition-all duration-500 hover:shadow-[0_0_50px_rgba(99,102,241,0.35)]">
+        <div className="relative w-[420px] rounded-3xl p-[1px] bg-gradient-to-r from-[#00D4FF]/40 to-[#5B8CFF]/40 hover:shadow-[0_0_45px_rgba(0,212,255,0.35)] transition-all duration-500">
+          
+          <div className="bg-[#0F172A]/95 backdrop-blur-xl border border-[#1F2A3A] rounded-3xl p-8 text-center">
 
-          <h2 className="text-3xl font-bold mb-6 text-indigo-400">
-            Weekly Reward
-          </h2>
+            <h2 className="text-3xl font-bold mb-6 bg-gradient-to-r from-[#00D4FF] to-[#5B8CFF] bg-clip-text text-transparent">
+              Weekly Reward
+            </h2>
 
-          {!walletAddress ? (
-            <button
-              onClick={connectWallet}
-              className="bg-indigo-600 hover:bg-indigo-500 px-6 py-3 rounded-xl w-full font-semibold transition-all duration-300 hover:shadow-[0_0_25px_rgba(99,102,241,0.4)]"
-            >
-              Connect Wallet
-            </button>
-          ) : (
-            <>
-              <p className="mb-3 text-sm break-words opacity-80">
-                {walletAddress}
-              </p>
-
-              <div className="bg-[#0F172A] rounded-xl p-4 mb-6 border border-indigo-500/10">
-                <p className="text-lg font-semibold mb-2">
-                  Reward: {rewardAmount}
+            {!walletAddress ? (
+              <button
+                onClick={connectWallet}
+                className="w-full py-3 rounded-xl font-semibold bg-gradient-to-r from-[#00D4FF] to-[#5B8CFF] text-black hover:shadow-[0_0_30px_rgba(0,212,255,0.65)] hover:scale-[1.02] transition-all duration-300"
+              >
+                Connect Wallet
+              </button>
+            ) : (
+              <>
+                <p className="mb-4 text-sm break-words opacity-70">
+                  {walletAddress}
                 </p>
 
-                {cooldownLeft > 0 ? (
-                  <p className="text-rose-400 text-sm">
-                    Next claim in: {formatTime(cooldownLeft)}
+                <div className="bg-[#111C2D] rounded-xl p-5 mb-6 border border-[#1F2A3A]">
+                  <p className="text-lg font-semibold mb-2">
+                    Reward: <span className="text-[#00D4FF]">{rewardAmount}</span>
                   </p>
-                ) : (
-                  <p className="text-emerald-400 text-sm">
-                    You can claim now!
-                  </p>
-                )}
-              </div>
 
-              <button
-                onClick={claimReward}
-                disabled={loading || cooldownLeft > 0}
-                className={`w-full px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                  cooldownLeft > 0
-                    ? "bg-gray-600 cursor-not-allowed"
-                    : "bg-emerald-500 hover:bg-emerald-400 hover:shadow-[0_0_25px_rgba(16,185,129,0.4)]"
-                }`}
-              >
-                {loading ? "Claiming..." : "Claim Reward"}
-              </button>
-            </>
-          )}
+                  {cooldownLeft > 0 ? (
+                    <p className="text-rose-400 text-sm">
+                      Next claim in: {formatTime(cooldownLeft)}
+                    </p>
+                  ) : (
+                    <p className="text-emerald-400 text-sm">
+                      You can claim now!
+                    </p>
+                  )}
+                </div>
+
+                <button
+                  onClick={claimReward}
+                  disabled={loading || cooldownLeft > 0}
+                  className={`w-full py-3 rounded-xl font-semibold transition-all duration-300 ${
+                    cooldownLeft > 0
+                      ? "bg-[#162133] border border-[#1F2A3A] text-gray-500 cursor-not-allowed"
+                      : "bg-gradient-to-r from-[#00D4FF] to-[#5B8CFF] text-black hover:shadow-[0_0_30px_rgba(0,212,255,0.65)] hover:scale-[1.02]"
+                  }`}
+                >
+                  {loading ? "Claiming..." : "Claim Reward"}
+                </button>
+              </>
+            )}
+
+          </div>
         </div>
       </main>
     </div>
