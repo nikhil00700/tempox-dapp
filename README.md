@@ -1,3 +1,50 @@
+# 🚀 Tempo X – Decentralized Application (DApp)
+
+## 📌 Overview
+Tempo X is a blockchain-based decentralized application designed to enable secure transactions / manage digital assets / tracking system.  
+The goal of this project is to explore real-world applications of blockchain technology and build a scalable, user-focused solution.
+
+---
+
+## ⚙️ Features
+- 🔐 Secure and decentralized architecture  
+- ⚡ Fast and efficient transaction handling  
+- 🌐 User-friendly interface 
+- 📊 Real-time interaction with blockchain  
+
+---
+
+## 🛠️ Tech Stack
+- TypeScript  
+- Blockchain Technology based on Tempo Testnet Network  
+- Frontend - Next.js (React) with Tailwind CSS, interacting with smart contracts via ethers.js 
+
+---
+
+## 🧠 What I Learned
+- Practical implementation of decentralized applications  
+- Smart contract interaction and blockchain logic  
+- Problem-solving in real-world tech scenarios  
+- Debugging and structuring scalable code  
+
+---
+
+## 🚀 How to Run (if applicable)
+```bash
+# Clone the repository
+git clone https://github.com/nikhil00700/tempox-dapp.git
+
+# Navigate to project folder
+cd tempox-dapp
+
+# Install dependencies
+npm install
+
+# Run the project
+npm start
+
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
